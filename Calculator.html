@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculator</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .calculator {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            margin: 50px auto;
+            width: 250px;
+            height: 350px;
+            border-radius: 20px;
+            border: 1px solid black;
+            background-color: cornsilk;
+        }
+        .output {
+            box-sizing: border-box;
+            padding-right: 10px;
+            text-align: end;
+            line-height: 40px;
+            width: 200px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid black;
+            background-color: ghostwhite;
+
+        }
+        .digits {
+            width: 200px;
+            height: 100px;
+            border-radius: 10px;
+            border: 1px solid black;
+            background-color: mistyrose;
+
+
+        }
+        .operators {
+            width: 200px;
+            height: 50px;
+            border-radius: 10px;
+            border: 1px solid black;
+            background-color: mistyrose;
+        }
+        .specials {
+            width: 200px;
+            height: 50px;
+            border-radius: 10px;
+            border: 1px solid black;
+            background-color: mistyrose;
+
+        }
+        button {
+            width: 30px;
+            height: 40px;
+            margin: 5px;
+            background-color: azure;
+            border-radius: 10px;
+            border: 1px solid black;
+        }
+        button:hover {
+            cursor: pointer;
+            filter: brightness(120%);
+        }
+        button:active {
+            filter: brightness(90%);
+        }
+
+    </style>
+</head>
+<body>
+<script>
+
+  function createButton(symbols, digitsParent, operatorsParent, specialsParent, output){
+      let operator = '';
+      let special = '';
+      let a= '';
+      let b = '';
+      let result = '';
+
+      //Вспомогательня функция для CreateButton обсчитывает результат.
+      //Обсчитывает результат при наличии аргументов и операторов.
+      function calculation () {
+          if  ((a !== '') && (b !== '')) {
+              switch (operator) {
+                  case '+':
+                      result = Number(a) + Number(b)
+                      break;
+                  case '-':
+                      result = Number(a) - Number(b);
+                      break;
+                  case '*':
+                      result = Number(a) * Number(b);
+                      break;
+                  case '/':
+                      result = Number(a) / Number(b);
+                      break;
+                  case '%':
+                     result = Number(a) / Number(b) * 100;
+                     break;
+              }
+                  output.textContent = result;
+                  a = result;
+                  b = '';
+                  result = '';
+                  operator = '';
+          }
+      }
+
+      //Циклом проходим по каждому Символу, создавая для него кнопку и логику.
+      for (let prop in symbols) {
+          symbols[prop].forEach(symbol => {
+              let button = document.createElement('button');
+              button.textContent = symbol;
+              switch (prop) {
+                  case 'digits':
+                      digitsParent.append(button);
+                      button.addEventListener('click', function () {
+                          if ((symbols.operators.includes(operator)) && (a != '')){
+                              b += symbol;
+                              output.textContent = Number(b);
+                          } else {
+                              a = output.textContent;
+                              a += symbol;
+                              output.textContent = Number(a);
+                          }
+                      });
+                      break;
+                  case 'operators':
+                      operatorsParent.append(button);
+                      button.addEventListener('click', function () {
+                          if (operator == '') operator = button.textContent;
+                          if ((a != '') && (b != '')) {
+                              calculation();
+                              operator = button.textContent;
+                          }
+                          operator = button.textContent;
+                      });
+                      break;
+                  case 'specials':
+                      specialsParent.append(button);
+                      button.addEventListener('click', function () {
+                          special = button.textContent;
+                          switch (special) {
+                              case '=':
+                                  calculation();
+                                  break;
+                              case 'c':
+                                  output.textContent= '0';
+                                  a = '';
+                                  b = '';
+                                  result = '';
+                                  operator = '';
+                                  break;
+                          }
+                      });
+                      break;
+              }
+          });
+      }
+  }
+  //Функция создаёт символы для калькулятора из заданной в параметр строки.
+  //Функция возвращает обьект с трёмя массивами(цифры, знаки и остальные).
+  function symbolsForCalculator (stringWithAllSymbol){
+    let arrayAllSymbol = stringWithAllSymbol.split('');
+    let objArraysSymbols = {digits:[], operators:[], specials:[]};
+    arrayAllSymbol.forEach(symbol => {
+        if (!(isNaN(parseInt(symbol)))) {
+            objArraysSymbols.digits.push(symbol);
+        }
+        else {
+            switch (symbol) {
+                case '-':
+                    objArraysSymbols.operators.push(symbol);
+                    break;
+                case '+':
+                    objArraysSymbols.operators.push(symbol);
+                    break;
+                case '*':
+                    objArraysSymbols.operators.push(symbol);
+                    break;
+                case '/':
+                    objArraysSymbols.operators.push(symbol);
+                    break;
+                case '%':
+                    objArraysSymbols.operators.push(symbol);
+                    break;
+                default:
+                    objArraysSymbols.specials.push(symbol);
+            }
+        }
+    });
+     return objArraysSymbols;
+  }
+  //Функция создаёт калькулятор в DOM
+  function createCalculator(parent, symbols){
+      let calculator = document.createElement('div');
+      let output = document.createElement('div');
+      let digitsDiv = document.createElement('div');
+      let operatorsDiv = document.createElement('div');
+      let specialsDiv = document.createElement('div');
+
+      calculator.className = 'calculator';
+      output.className = 'output';
+      digitsDiv.className = 'digits';
+      operatorsDiv.className = 'operators';
+      specialsDiv.className = 'specials';
+
+
+      parent.append(calculator);
+      calculator.append(output);
+      calculator.append(digitsDiv);
+      calculator.append(operatorsDiv);
+      calculator.append(specialsDiv);
+
+      createButton(symbols, digitsDiv, operatorsDiv, specialsDiv, output);
+  }
+
+
+  createCalculator(document.body,symbolsForCalculator('1234567890-=%*+/c'));
+</script>
+</body>
+</html>
